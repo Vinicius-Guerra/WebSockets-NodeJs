@@ -35,4 +35,12 @@ function encontrarDocumento(nome) {
     return atualizacao;
   }
 
-  export { encontrarDocumento, atualizaDocunento, obterDocumentos, adicionarDocumento };
+  function excluirDocumento(nome) {
+    const resultado = documentosColecao.deleteOne({
+        nome
+    });
+
+    return resultado;
+  }
+
+  export { encontrarDocumento, atualizaDocunento, obterDocumentos, adicionarDocumento, excluirDocumento };

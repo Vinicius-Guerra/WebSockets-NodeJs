@@ -1,4 +1,4 @@
-import { adicionarDocumento, atualizaDocunento, encontrarDocumento, obterDocumentos } from "./documentosDb.js";
+import { adicionarDocumento, atualizaDocunento, encontrarDocumento, excluirDocumento, obterDocumentos } from "./documentosDb.js";
 import io from "./servidor.js";
 
 
@@ -11,11 +11,18 @@ import io from "./servidor.js";
     });
 
     socket.on("adicionar_documento", async (nome) => {
-      const resultado = await adicionarDocumento(nome);
+      const documentoExiste = (await encontrarDocumento(nome)) !== null;
 
-      if(resultado.acknowledged){
-        io.emit("adicionar_documento_interface", nome);
+      if(documentoExiste) {
+        socket.emit("documento_existente", nome);
+      } else {
+        const resultado = await adicionarDocumento(nome);
+  
+        if(resultado.acknowledged){
+          io.emit("adicionar_documento_interface", nome);
+        }
       }
+      
     })
 
     socket.on("selecionar_documento", async (nomeDocumento, devolverTexto) => {
@@ -35,5 +42,13 @@ import io from "./servidor.js";
             socket.to(nomeDocumento).emit("texto_editor_clientes", texto);
         }
     });
+
+    socket.on("excluir_documento", async (nome) => {
+      const resultado = await excluirDocumento(nome);
+
+      if(resultado.deletedCount) {
+        io.emit("excluir_documento_sucesso", nome);
+      }
+    })
   });
   
